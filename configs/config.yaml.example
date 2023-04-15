@@ -1,0 +1,24 @@
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+    cert : 
+      ca_cert: 
+      cert_file: 
+      key_file: 
+  authorization:
+    resource:
+      acl: ./configs/casbin/resource_acl.csv
+    permission:
+      acl: ./configs/casbin/permission_acl.csv
+
+data:
+  vault:
+    addr: 
+    cert:
+      ca_cert: 
+    authPath: 
+    roleID: 
+    secretID:
+  zipkin:
+    url: 

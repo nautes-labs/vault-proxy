@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package api.vaultproxy.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "vault-proxy/api/vaultproxy/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.vaultproxy.v1";
+
+service Health {
+	rpc Health (HealthRequest) returns (HealthReply) {
+		option (google.api.http) = {
+			get: "/health"
+		};
+	};
+}
+
+message HealthRequest {}
+message HealthReply {
+	bool standBy = 1;
+	bool vault = 2;
+}

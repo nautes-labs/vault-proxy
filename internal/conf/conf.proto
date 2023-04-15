@@ -1,0 +1,74 @@
+// Copyright 2023 Nautes Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+package kratos.api;
+
+option go_package = "vproxy/internal/conf;conf";
+
+import "google/protobuf/duration.proto";
+
+message Bootstrap {
+  Server server = 1;
+  Data data = 2;
+}
+
+message Nautes {
+  repeated string tenant_name  = 1;
+}
+
+message Cert {
+  // Verify client key pair
+  string ca_cert = 1;
+  // Server side https keypair
+  string cert_file = 2;
+  string key_file = 3;
+}
+
+message Server {
+  message HTTP {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+    Cert cert = 4;
+  }
+  message Authorization {
+    message Casbin {
+      string acl = 1;
+    }
+    Casbin resource = 1;
+    Casbin permission = 2;
+  }
+  HTTP http = 1;
+  Authorization authorization = 2;
+
+  Nautes nautes = 3;
+}
+
+message Data {
+  message Vault {
+    string addr = 1;
+    string token = 2;
+    Cert cert = 3;
+    string authPath = 4;
+    string roleID = 5;
+    string secretID = 6;
+  }
+  message Zipkin {
+    string url = 1;
+  }
+  // Use to connect vault backend
+  Vault vault = 1;
+  Zipkin zipkin = 2;
+}
