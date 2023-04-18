@@ -10,7 +10,7 @@ require (
 	github.com/google/wire v0.5.0
 	github.com/hashicorp/vault/api v1.9.0
 	github.com/hashicorp/vault/api/auth/approle v0.4.0
-	github.com/nautes-labs/pkg v0.2.0
+	github.com/nautes-labs/pkg v0.2.1
 	github.com/onsi/ginkgo/v2 v2.3.1
 	github.com/onsi/gomega v1.22.0
 	github.com/qiangmzsx/string-adapter/v2 v2.1.0
