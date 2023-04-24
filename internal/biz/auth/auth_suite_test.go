@@ -46,14 +46,21 @@ func (m *mockSecret) ConvertRequest() (*vpApi.SecretRequest, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
+	secretMeta, _ := m.GetNames()
 	return &vpApi.SecretRequest{
+		SecretMeta: *secretMeta,
+		SecretData: m.SecretData,
+		PolicyData: m.PolicyData,
+	}, nil
+}
+
+func (m *mockSecret) GetNames() (*vpApi.SecretMeta, error) {
+	return &vpApi.SecretMeta{
 		SecretName: m.SecretName,
 		SecretPath: m.SecretPath,
 		SecretType: m.SecretType,
 		FullPath:   m.FullPath,
 		PolicyName: m.PolicyName,
-		SecretData: m.SecretData,
-		PolicyData: m.PolicyData,
 	}, nil
 }
 

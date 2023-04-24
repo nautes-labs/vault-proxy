@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.6.1
 // - protoc             v3.21.5
-// source: vaultproxy/v1/vaultproxy.proto
+// source: api/vaultproxy/v1/vaultproxy.proto
 
 package v1
 
@@ -51,17 +51,17 @@ type SecretHTTPServer interface {
 func RegisterSecretHTTPServer(s *http.Server, srv SecretHTTPServer) {
 	r := s.Route("/")
 	r.POST("/v1/git", _Secret_CreateGit0_HTTP_Handler(srv))
-	r.DELETE("/v1/git/{providertype}/{repoid}/{username}/{permission}", _Secret_DeleteGit0_HTTP_Handler(srv))
+	r.DELETE("/v1/git/{meta.provider_type}/{meta.id}/{meta.username}/{meta.permission}", _Secret_DeleteGit0_HTTP_Handler(srv))
 	r.POST("/v1/pki", _Secret_CreatePki0_HTTP_Handler(srv))
 	r.DELETE("/v1/pki/{domain}", _Secret_DeletePki0_HTTP_Handler(srv))
 	r.POST("/v1/repo", _Secret_CreateRepo0_HTTP_Handler(srv))
-	r.DELETE("/v1/repo/{providerid}/{repotype}/{repoid}/{username}/{permission}", _Secret_DeleteRepo0_HTTP_Handler(srv))
+	r.DELETE("/v1/repo/{meta.provider_id}/{meta.type}/{meta.id}/{meta.username}/{meta.permission}", _Secret_DeleteRepo0_HTTP_Handler(srv))
 	r.POST("/v1/tenant/git", _Secret_CreteTenantGit0_HTTP_Handler(srv))
-	r.DELETE("/v1/tenant/git/{id}", _Secret_DeleteTenantGit0_HTTP_Handler(srv))
+	r.DELETE("/v1/tenant/git/{meta.id}", _Secret_DeleteTenantGit0_HTTP_Handler(srv))
 	r.POST("/v1/tenant/repos", _Secret_CreateTenantRepo0_HTTP_Handler(srv))
-	r.DELETE("/v1/tenant/repos/{id}", _Secret_DeleteTenantRepo0_HTTP_Handler(srv))
+	r.DELETE("/v1/tenant/repos/{meta.id}", _Secret_DeleteTenantRepo0_HTTP_Handler(srv))
 	r.POST("/v1/cluster", _Secret_CreateCluster0_HTTP_Handler(srv))
-	r.DELETE("/v1/cluster/{clustertype}/{clusterid}/{username}/{permission}", _Secret_DeleteCluster0_HTTP_Handler(srv))
+	r.DELETE("/v1/cluster/{meta.type}/{meta.id}/{meta.username}/{meta.permission}", _Secret_DeleteCluster0_HTTP_Handler(srv))
 }
 
 func _Secret_CreateGit0_HTTP_Handler(srv SecretHTTPServer) func(ctx http.Context) error {
@@ -413,7 +413,7 @@ func (c *SecretHTTPClientImpl) CreteTenantGit(ctx context.Context, in *TenantGit
 
 func (c *SecretHTTPClientImpl) DeleteCluster(ctx context.Context, in *ClusterRequest, opts ...http.CallOption) (*DeleteClusterReply, error) {
 	var out DeleteClusterReply
-	pattern := "/v1/cluster/{clustertype}/{clusterid}/{username}/{permission}"
+	pattern := "/v1/cluster/{meta.type}/{meta.id}/{meta.username}/{meta.permission}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationSecretDeleteCluster))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -426,7 +426,7 @@ func (c *SecretHTTPClientImpl) DeleteCluster(ctx context.Context, in *ClusterReq
 
 func (c *SecretHTTPClientImpl) DeleteGit(ctx context.Context, in *GitRequest, opts ...http.CallOption) (*DeleteGitReply, error) {
 	var out DeleteGitReply
-	pattern := "/v1/git/{providertype}/{repoid}/{username}/{permission}"
+	pattern := "/v1/git/{meta.provider_type}/{meta.id}/{meta.username}/{meta.permission}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationSecretDeleteGit))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -452,7 +452,7 @@ func (c *SecretHTTPClientImpl) DeletePki(ctx context.Context, in *PkiRequest, op
 
 func (c *SecretHTTPClientImpl) DeleteRepo(ctx context.Context, in *RepoRequest, opts ...http.CallOption) (*DeleteRepoReply, error) {
 	var out DeleteRepoReply
-	pattern := "/v1/repo/{providerid}/{repotype}/{repoid}/{username}/{permission}"
+	pattern := "/v1/repo/{meta.provider_id}/{meta.type}/{meta.id}/{meta.username}/{meta.permission}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationSecretDeleteRepo))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -465,7 +465,7 @@ func (c *SecretHTTPClientImpl) DeleteRepo(ctx context.Context, in *RepoRequest, 
 
 func (c *SecretHTTPClientImpl) DeleteTenantGit(ctx context.Context, in *TenantGitRequest, opts ...http.CallOption) (*DeleteTenantGitReply, error) {
 	var out DeleteTenantGitReply
-	pattern := "/v1/tenant/git/{id}"
+	pattern := "/v1/tenant/git/{meta.id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationSecretDeleteTenantGit))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -478,7 +478,7 @@ func (c *SecretHTTPClientImpl) DeleteTenantGit(ctx context.Context, in *TenantGi
 
 func (c *SecretHTTPClientImpl) DeleteTenantRepo(ctx context.Context, in *TenantRepoRequest, opts ...http.CallOption) (*DeleteTenantRepoReply, error) {
 	var out DeleteTenantRepoReply
-	pattern := "/v1/tenant/repos/{id}"
+	pattern := "/v1/tenant/repos/{meta.id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationSecretDeleteTenantRepo))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -504,9 +504,9 @@ type AuthHTTPServer interface {
 func RegisterAuthHTTPServer(s *http.Server, srv AuthHTTPServer) {
 	r := s.Route("/")
 	r.POST("/v1/auth", _Auth_CreateAuth0_HTTP_Handler(srv))
-	r.DELETE("/v1/auth/{clusterName}", _Auth_DeleteAuth0_HTTP_Handler(srv))
-	r.POST("/v1/auth/{clusterName}/role", _Auth_CreateAuthrole0_HTTP_Handler(srv))
-	r.DELETE("/v1/auth/{clusterName}/role/{destUser}", _Auth_DeleteAuthrole0_HTTP_Handler(srv))
+	r.DELETE("/v1/auth/{cluster_name}", _Auth_DeleteAuth0_HTTP_Handler(srv))
+	r.POST("/v1/auth/{cluster_name}/role", _Auth_CreateAuthrole0_HTTP_Handler(srv))
+	r.DELETE("/v1/auth/{cluster_name}/role/{dest_user}", _Auth_DeleteAuthrole0_HTTP_Handler(srv))
 }
 
 func _Auth_CreateAuth0_HTTP_Handler(srv AuthHTTPServer) func(ctx http.Context) error {
@@ -624,7 +624,7 @@ func (c *AuthHTTPClientImpl) CreateAuth(ctx context.Context, in *AuthRequest, op
 
 func (c *AuthHTTPClientImpl) CreateAuthrole(ctx context.Context, in *AuthroleRequest, opts ...http.CallOption) (*CreateAuthroleReply, error) {
 	var out CreateAuthroleReply
-	pattern := "/v1/auth/{clusterName}/role"
+	pattern := "/v1/auth/{cluster_name}/role"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthCreateAuthrole))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -637,7 +637,7 @@ func (c *AuthHTTPClientImpl) CreateAuthrole(ctx context.Context, in *AuthroleReq
 
 func (c *AuthHTTPClientImpl) DeleteAuth(ctx context.Context, in *AuthRequest, opts ...http.CallOption) (*DeleteAuthReply, error) {
 	var out DeleteAuthReply
-	pattern := "/v1/auth/{clusterName}"
+	pattern := "/v1/auth/{cluster_name}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAuthDeleteAuth))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -650,7 +650,7 @@ func (c *AuthHTTPClientImpl) DeleteAuth(ctx context.Context, in *AuthRequest, op
 
 func (c *AuthHTTPClientImpl) DeleteAuthrole(ctx context.Context, in *AuthroleRequest, opts ...http.CallOption) (*DeleteAuthroleReply, error) {
 	var out DeleteAuthroleReply
-	pattern := "/v1/auth/{clusterName}/role/{destUser}"
+	pattern := "/v1/auth/{cluster_name}/role/{dest_user}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAuthDeleteAuthrole))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -687,16 +687,16 @@ type AuthGrantHTTPServer interface {
 
 func RegisterAuthGrantHTTPServer(s *http.Server, srv AuthGrantHTTPServer) {
 	r := s.Route("/")
-	r.POST("/v1/auth/{clusterName}/role/{destUser}/policies/git", _AuthGrant_GrantAuthroleGitPolicy0_HTTP_Handler(srv))
-	r.DELETE("/v1/auth/{clusterName}/role/{destUser}/policies/git", _AuthGrant_RevokeAuthroleGitPolicy0_HTTP_Handler(srv))
-	r.POST("/v1/auth/{clusterName}/role/{destUser}/policies/repo", _AuthGrant_GrantAuthroleRepoPolicy0_HTTP_Handler(srv))
-	r.DELETE("/v1/auth/{clusterName}/role/{destUser}/policies/repo", _AuthGrant_RevokeAuthroleRepoPolicy0_HTTP_Handler(srv))
-	r.POST("/v1/auth/{clusterName}/role/{destUser}/policies/cluster", _AuthGrant_GrantAuthroleClusterPolicy0_HTTP_Handler(srv))
-	r.DELETE("/v1/auth/{clusterName}/role/{destUser}/policies/cluster", _AuthGrant_RevokeAuthroleClusterPolicy0_HTTP_Handler(srv))
-	r.POST("/v1/auth/{clusterName}/role/{destUser}/policies/tenant/git", _AuthGrant_GrantAuthroleTenantGitPolicy0_HTTP_Handler(srv))
-	r.DELETE("/v1/auth/{clusterName}/role/{destUser}/policies/tenant/git", _AuthGrant_RevokeAuthroleTenantGitPolicy0_HTTP_Handler(srv))
-	r.POST("/v1/auth/{clusterName}/role/{destUser}/policies/tenant/repo", _AuthGrant_GrantAuthroleTenantRepoPolicy0_HTTP_Handler(srv))
-	r.DELETE("/v1/auth/{clusterName}/role/{destUser}/policies/tenant/repo", _AuthGrant_RevokeAuthroleTenantRepoPolicy0_HTTP_Handler(srv))
+	r.POST("/v1/auth/{cluster_name}/role/{dest_user}/policies/git", _AuthGrant_GrantAuthroleGitPolicy0_HTTP_Handler(srv))
+	r.DELETE("/v1/auth/{cluster_name}/role/{dest_user}/policies/git", _AuthGrant_RevokeAuthroleGitPolicy0_HTTP_Handler(srv))
+	r.POST("/v1/auth/{cluster_name}/role/{dest_user}/policies/repo", _AuthGrant_GrantAuthroleRepoPolicy0_HTTP_Handler(srv))
+	r.DELETE("/v1/auth/{cluster_name}/role/{dest_user}/policies/repo", _AuthGrant_RevokeAuthroleRepoPolicy0_HTTP_Handler(srv))
+	r.POST("/v1/auth/{cluster_name}/role/{dest_user}/policies/cluster", _AuthGrant_GrantAuthroleClusterPolicy0_HTTP_Handler(srv))
+	r.DELETE("/v1/auth/{cluster_name}/role/{dest_user}/policies/cluster", _AuthGrant_RevokeAuthroleClusterPolicy0_HTTP_Handler(srv))
+	r.POST("/v1/auth/{cluster_name}/role/{dest_user}/policies/tenant/git", _AuthGrant_GrantAuthroleTenantGitPolicy0_HTTP_Handler(srv))
+	r.DELETE("/v1/auth/{cluster_name}/role/{dest_user}/policies/tenant/git", _AuthGrant_RevokeAuthroleTenantGitPolicy0_HTTP_Handler(srv))
+	r.POST("/v1/auth/{cluster_name}/role/{dest_user}/policies/tenant/repo", _AuthGrant_GrantAuthroleTenantRepoPolicy0_HTTP_Handler(srv))
+	r.DELETE("/v1/auth/{cluster_name}/role/{dest_user}/policies/tenant/repo", _AuthGrant_RevokeAuthroleTenantRepoPolicy0_HTTP_Handler(srv))
 }
 
 func _AuthGrant_GrantAuthroleGitPolicy0_HTTP_Handler(srv AuthGrantHTTPServer) func(ctx http.Context) error {
@@ -942,7 +942,7 @@ func NewAuthGrantHTTPClient(client *http.Client) AuthGrantHTTPClient {
 
 func (c *AuthGrantHTTPClientImpl) GrantAuthroleClusterPolicy(ctx context.Context, in *AuthroleClusterPolicyRequest, opts ...http.CallOption) (*GrantAuthrolePolicyReply, error) {
 	var out GrantAuthrolePolicyReply
-	pattern := "/v1/auth/{clusterName}/role/{destUser}/policies/cluster"
+	pattern := "/v1/auth/{cluster_name}/role/{dest_user}/policies/cluster"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthGrantGrantAuthroleClusterPolicy))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -955,7 +955,7 @@ func (c *AuthGrantHTTPClientImpl) GrantAuthroleClusterPolicy(ctx context.Context
 
 func (c *AuthGrantHTTPClientImpl) GrantAuthroleGitPolicy(ctx context.Context, in *AuthroleGitPolicyRequest, opts ...http.CallOption) (*GrantAuthrolePolicyReply, error) {
 	var out GrantAuthrolePolicyReply
-	pattern := "/v1/auth/{clusterName}/role/{destUser}/policies/git"
+	pattern := "/v1/auth/{cluster_name}/role/{dest_user}/policies/git"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthGrantGrantAuthroleGitPolicy))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -968,7 +968,7 @@ func (c *AuthGrantHTTPClientImpl) GrantAuthroleGitPolicy(ctx context.Context, in
 
 func (c *AuthGrantHTTPClientImpl) GrantAuthroleRepoPolicy(ctx context.Context, in *AuthroleRepoPolicyRequest, opts ...http.CallOption) (*GrantAuthrolePolicyReply, error) {
 	var out GrantAuthrolePolicyReply
-	pattern := "/v1/auth/{clusterName}/role/{destUser}/policies/repo"
+	pattern := "/v1/auth/{cluster_name}/role/{dest_user}/policies/repo"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthGrantGrantAuthroleRepoPolicy))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -981,7 +981,7 @@ func (c *AuthGrantHTTPClientImpl) GrantAuthroleRepoPolicy(ctx context.Context, i
 
 func (c *AuthGrantHTTPClientImpl) GrantAuthroleTenantGitPolicy(ctx context.Context, in *AuthroleTenantGitPolicyRequest, opts ...http.CallOption) (*GrantAuthrolePolicyReply, error) {
 	var out GrantAuthrolePolicyReply
-	pattern := "/v1/auth/{clusterName}/role/{destUser}/policies/tenant/git"
+	pattern := "/v1/auth/{cluster_name}/role/{dest_user}/policies/tenant/git"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthGrantGrantAuthroleTenantGitPolicy))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -994,7 +994,7 @@ func (c *AuthGrantHTTPClientImpl) GrantAuthroleTenantGitPolicy(ctx context.Conte
 
 func (c *AuthGrantHTTPClientImpl) GrantAuthroleTenantRepoPolicy(ctx context.Context, in *AuthroleTenantRepoPolicyRequest, opts ...http.CallOption) (*GrantAuthrolePolicyReply, error) {
 	var out GrantAuthrolePolicyReply
-	pattern := "/v1/auth/{clusterName}/role/{destUser}/policies/tenant/repo"
+	pattern := "/v1/auth/{cluster_name}/role/{dest_user}/policies/tenant/repo"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthGrantGrantAuthroleTenantRepoPolicy))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1007,7 +1007,7 @@ func (c *AuthGrantHTTPClientImpl) GrantAuthroleTenantRepoPolicy(ctx context.Cont
 
 func (c *AuthGrantHTTPClientImpl) RevokeAuthroleClusterPolicy(ctx context.Context, in *AuthroleClusterPolicyRequest, opts ...http.CallOption) (*RevokeAuthrolePolicyReply, error) {
 	var out RevokeAuthrolePolicyReply
-	pattern := "/v1/auth/{clusterName}/role/{destUser}/policies/cluster"
+	pattern := "/v1/auth/{cluster_name}/role/{dest_user}/policies/cluster"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAuthGrantRevokeAuthroleClusterPolicy))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1020,7 +1020,7 @@ func (c *AuthGrantHTTPClientImpl) RevokeAuthroleClusterPolicy(ctx context.Contex
 
 func (c *AuthGrantHTTPClientImpl) RevokeAuthroleGitPolicy(ctx context.Context, in *AuthroleGitPolicyRequest, opts ...http.CallOption) (*RevokeAuthrolePolicyReply, error) {
 	var out RevokeAuthrolePolicyReply
-	pattern := "/v1/auth/{clusterName}/role/{destUser}/policies/git"
+	pattern := "/v1/auth/{cluster_name}/role/{dest_user}/policies/git"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAuthGrantRevokeAuthroleGitPolicy))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1033,7 +1033,7 @@ func (c *AuthGrantHTTPClientImpl) RevokeAuthroleGitPolicy(ctx context.Context, i
 
 func (c *AuthGrantHTTPClientImpl) RevokeAuthroleRepoPolicy(ctx context.Context, in *AuthroleRepoPolicyRequest, opts ...http.CallOption) (*RevokeAuthrolePolicyReply, error) {
 	var out RevokeAuthrolePolicyReply
-	pattern := "/v1/auth/{clusterName}/role/{destUser}/policies/repo"
+	pattern := "/v1/auth/{cluster_name}/role/{dest_user}/policies/repo"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAuthGrantRevokeAuthroleRepoPolicy))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1046,7 +1046,7 @@ func (c *AuthGrantHTTPClientImpl) RevokeAuthroleRepoPolicy(ctx context.Context, 
 
 func (c *AuthGrantHTTPClientImpl) RevokeAuthroleTenantGitPolicy(ctx context.Context, in *AuthroleTenantGitPolicyRequest, opts ...http.CallOption) (*RevokeAuthrolePolicyReply, error) {
 	var out RevokeAuthrolePolicyReply
-	pattern := "/v1/auth/{clusterName}/role/{destUser}/policies/tenant/git"
+	pattern := "/v1/auth/{cluster_name}/role/{dest_user}/policies/tenant/git"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAuthGrantRevokeAuthroleTenantGitPolicy))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1059,7 +1059,7 @@ func (c *AuthGrantHTTPClientImpl) RevokeAuthroleTenantGitPolicy(ctx context.Cont
 
 func (c *AuthGrantHTTPClientImpl) RevokeAuthroleTenantRepoPolicy(ctx context.Context, in *AuthroleTenantRepoPolicyRequest, opts ...http.CallOption) (*RevokeAuthrolePolicyReply, error) {
 	var out RevokeAuthrolePolicyReply
-	pattern := "/v1/auth/{clusterName}/role/{destUser}/policies/tenant/repo"
+	pattern := "/v1/auth/{cluster_name}/role/{dest_user}/policies/tenant/repo"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAuthGrantRevokeAuthroleTenantRepoPolicy))
 	opts = append(opts, http.PathTemplate(pattern))

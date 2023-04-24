@@ -35,9 +35,11 @@ func (s *SecretService) CreateGit(ctx context.Context, req *pb.GitRequest) (*pb.
 		return nil, err
 	}
 	return &pb.CreateGitReply{
-		SecretName:    sec.SecretName,
-		SecretPath:    sec.SecretPath,
-		SecretVersion: int32(sec.SecretVersion),
+		Secret: &pb.SecretInfo{
+			Name:    sec.SecretName,
+			Path:    sec.SecretPath,
+			Version: int32(sec.SecretVersion),
+		},
 	}, nil
 }
 func (s *SecretService) DeleteGit(ctx context.Context, req *pb.GitRequest) (*pb.DeleteGitReply, error) {
@@ -59,9 +61,11 @@ func (s *SecretService) CreateRepo(ctx context.Context, req *pb.RepoRequest) (*p
 		return nil, err
 	}
 	return &pb.CreateRepoReply{
-		SecretName:    sec.SecretName,
-		SecretPath:    sec.SecretPath,
-		SecretVersion: int32(sec.SecretVersion),
+		Secret: &pb.SecretInfo{
+			Name:    sec.SecretName,
+			Path:    sec.SecretPath,
+			Version: int32(sec.SecretVersion),
+		},
 	}, nil
 }
 func (s *SecretService) DeleteRepo(ctx context.Context, req *pb.RepoRequest) (*pb.DeleteRepoReply, error) {
@@ -77,9 +81,11 @@ func (s *SecretService) CreteTenantGit(ctx context.Context, req *pb.TenantGitReq
 		return nil, err
 	}
 	return &pb.CreateTenantGitReply{
-		SecretName:    sec.SecretName,
-		SecretPath:    sec.SecretPath,
-		SecretVersion: int32(sec.SecretVersion),
+		Secret: &pb.SecretInfo{
+			Name:    sec.SecretName,
+			Path:    sec.SecretPath,
+			Version: int32(sec.SecretVersion),
+		},
 	}, nil
 }
 func (s *SecretService) DeleteTenantGit(ctx context.Context, req *pb.TenantGitRequest) (*pb.DeleteTenantGitReply, error) {
@@ -95,9 +101,11 @@ func (s *SecretService) CreateTenantRepo(ctx context.Context, req *pb.TenantRepo
 		return nil, err
 	}
 	return &pb.CreateTenantRepoReply{
-		SecretName:    sec.SecretName,
-		SecretPath:    sec.SecretPath,
-		SecretVersion: int32(sec.SecretVersion),
+		Secret: &pb.SecretInfo{
+			Name:    sec.SecretName,
+			Path:    sec.SecretPath,
+			Version: int32(sec.SecretVersion),
+		},
 	}, nil
 }
 func (s *SecretService) DeleteTenantRepo(ctx context.Context, req *pb.TenantRepoRequest) (*pb.DeleteTenantRepoReply, error) {
@@ -113,9 +121,11 @@ func (s *SecretService) CreateCluster(ctx context.Context, req *pb.ClusterReques
 		return nil, err
 	}
 	return &pb.CreateClusterReply{
-		SecretName:    sec.SecretName,
-		SecretPath:    sec.SecretPath,
-		SecretVersion: int32(sec.SecretVersion),
+		Secret: &pb.SecretInfo{
+			Name:    sec.SecretName,
+			Path:    sec.SecretPath,
+			Version: int32(sec.SecretVersion),
+		},
 	}, nil
 }
 func (s *SecretService) DeleteCluster(ctx context.Context, req *pb.ClusterRequest) (*pb.DeleteClusterReply, error) {

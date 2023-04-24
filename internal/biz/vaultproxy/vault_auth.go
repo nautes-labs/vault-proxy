@@ -53,7 +53,7 @@ func (uc *VaultUsercase) EnableAuth(ctx context.Context, req *pb.AuthRequest) er
 	opts := map[string]interface{}{
 		"kubernetes_host":    req.Kubernetes.Url,
 		"kubernetes_ca_cert": req.Kubernetes.Cabundle,
-		"token_reviewer_jwt": req.Kubernetes.Usertoken,
+		"token_reviewer_jwt": req.Kubernetes.Token,
 	}
 	uc.log.WithContext(ctx).Infof("update auth %s", path)
 	_, err = uc.client.Write(ctx, configPath, opts)
@@ -101,7 +101,7 @@ func (uc *VaultUsercase) CreateRole(ctx context.Context, req *pb.AuthroleRequest
 	path := fmt.Sprintf("auth/%s/role/%s", req.ClusterName, req.DestUser)
 	opts := map[string]interface{}{
 		"bound_service_account_namespaces": req.GetK8S().Namespaces,
-		"bound_service_account_names":      req.GetK8S().Serviceaccounts,
+		"bound_service_account_names":      req.GetK8S().ServiceAccounts,
 	}
 
 	uc.log.WithContext(ctx).Infof("create or update role %s", path)

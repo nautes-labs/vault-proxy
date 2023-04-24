@@ -67,27 +67,27 @@ type VaultTemplate struct {
 var (
 	GitPathTemplate VaultTemplate = VaultTemplate{
 		name:     "gitPath",
-		template: "{{.Providertype}}/{{.Repoid}}/{{.Username}}/{{.Permission}}",
+		template: "{{.ProviderType}}/{{.Id}}/{{.Username}}/{{.Permission}}",
 	}
 	GitPolicyPathTemplate VaultTemplate = VaultTemplate{
 		name:     "gitPolicyPath",
-		template: "{{.Providertype}}-{{.Repoid}}-{{.Username}}-{{.Permission}}",
+		template: "{{.ProviderType}}-{{.Id}}-{{.Username}}-{{.Permission}}",
 	}
 	RepoPathTemplate VaultTemplate = VaultTemplate{
 		name:     "repoPath",
-		template: "{{.Providerid}}/{{.Repotype}}/{{.Repoid}}/{{.Username}}/{{.Permission}}",
+		template: "{{.ProviderId}}/{{.Type}}/{{.Id}}/{{.Username}}/{{.Permission}}",
 	}
 	RepoPolicyPathTemplate VaultTemplate = VaultTemplate{
 		name:     "repoPolicy",
-		template: "{{.Providerid}}-{{.Repotype}}-{{.Repoid}}-{{.Username}}-{{.Permission}}",
+		template: "{{.ProviderId}}-{{.Type}}-{{.Id}}-{{.Username}}-{{.Permission}}",
 	}
 	ClusterPathTemplate VaultTemplate = VaultTemplate{
 		name:     "clusterPath",
-		template: "{{.Clustertype}}/{{.Clusterid}}/{{.Username}}/{{.Permission}}",
+		template: "{{.Type}}/{{.Id}}/{{.Username}}/{{.Permission}}",
 	}
 	ClusterPolicyPathTemplate VaultTemplate = VaultTemplate{
 		name:     "clusterPolicyPath",
-		template: "{{.Clustertype}}-{{.Clusterid}}-{{.Username}}-{{.Permission}}",
+		template: "{{.Type}}-{{.Id}}-{{.Username}}-{{.Permission}}",
 	}
 	TenantGitPathTemplate VaultTemplate = VaultTemplate{
 		name:     "tenantGitPath",
@@ -125,10 +125,18 @@ func GetPath(vars interface{}, vault_tmpl VaultTemplate) (string, error) {
 	return path.String(), nil
 }
 
-func (x *GitAccount) getData() map[string]interface{} {
-	return map[string]interface{}{
-		x.GetAccesstype(): x.GetDeploykey(),
+func (x *GitKVs) getData() map[string]interface{} {
+	secretData := make(map[string]interface{}, 0)
+	for k, v := range x.Additionals {
+		secretData[k] = v
 	}
+	if x.GetDeployKey() != "" {
+		secretData["deploykey"] = x.GetDeployKey()
+	}
+	if x.GetAccessToken() != "" {
+		secretData["accesstoken"] = x.GetAccessToken()
+	}
+	return secretData
 }
 
 func (x *RepoAccount) getData() map[string]interface{} {
@@ -140,17 +148,6 @@ func (x *RepoAccount) getData() map[string]interface{} {
 
 func (x *ClusterAccount) getData() map[string]interface{} {
 	data := make(map[string]interface{})
-	if x.GetCert() != nil {
-		data["cert"] = x.GetCert().GetClientCert()
-		data["key"] = x.GetCert().GetClientKey()
-	}
-	if x.GetOauth() != nil {
-		data["username"] = x.GetOauth().GetUsername()
-		data["password"] = x.GetOauth().GetPassword()
-	}
-	if x.GetToken() != "" {
-		data["token"] = x.GetToken()
-	}
 	if x.GetKubeconfig() != "" {
 		data["kubeconfig"] = x.GetKubeconfig()
 	}
@@ -159,11 +156,7 @@ func (x *ClusterAccount) getData() map[string]interface{} {
 
 // Store the key info for authorize and vault request
 type SecretRequest struct {
-	SecretName string // secret name , use for vault api
-	SecretPath string // secret path , use for vault api
-	SecretType string // secret data type
-	FullPath   string // full path of secret use for create policy and authorize
-	PolicyName string // vault policy name, use for authorize and policy create
+	SecretMeta
 	SecretData map[string]interface{}
 	PolicyData string
 }
@@ -172,9 +165,15 @@ type SecRequest interface {
 	ConvertRequest() (*SecretRequest, error)
 }
 
-func (x *GitRequest) ConvertRequest() (*SecretRequest, error) {
-	var err error
+type SecretMeta struct {
+	SecretName string // secret name , use for vault api
+	SecretPath string // secret path , use for vault api
+	SecretType string // secret data type
+	FullPath   string // full path of secret use for create policy and authorize
+	PolicyName string // vault policy name, use for authorize and policy create
+}
 
+func (x *GitMeta) GetNames() (*SecretMeta, error) {
 	secretName := GitSecretName
 	secretPath, err := GetPath(x, GitPathTemplate)
 	if err != nil {
@@ -185,29 +184,36 @@ func (x *GitRequest) ConvertRequest() (*SecretRequest, error) {
 	if err != nil {
 		return nil, err
 	}
-	secretData := make(map[string]interface{}, 0)
-	for k, v := range x.AdditionalKVs {
-		secretData[k] = v
-	}
-	for k, v := range x.GetAccount().getData() {
-		secretData[k] = v
-	}
-	policyData := fmt.Sprintf(GitPolicy, secretPath)
 
-	return &SecretRequest{
+	return &SecretMeta{
 		SecretName: secretName,
 		SecretPath: secretPath,
 		SecretType: GIT.String(),
 		FullPath:   fullPath,
 		PolicyName: policyName,
+	}, nil
+}
+
+func (x *GitRequest) ConvertRequest() (*SecretRequest, error) {
+	secretMeta, err := x.Meta.GetNames()
+	if err != nil {
+		return nil, err
+	}
+
+	secretData := make(map[string]interface{}, 0)
+	if x.Kvs != nil {
+		secretData = x.Kvs.getData()
+	}
+	policyData := fmt.Sprintf(GitPolicy, secretMeta.SecretPath)
+
+	return &SecretRequest{
+		SecretMeta: *secretMeta,
 		SecretData: secretData,
 		PolicyData: policyData,
 	}, nil
 }
 
-func (x *RepoRequest) ConvertRequest() (*SecretRequest, error) {
-	var err error
-
+func (x *RepoMeta) GetNames() (*SecretMeta, error) {
 	secretName := RepoSecretName
 	secretPath, err := GetPath(x, RepoPathTemplate)
 	if err != nil {
@@ -218,23 +224,33 @@ func (x *RepoRequest) ConvertRequest() (*SecretRequest, error) {
 	if err != nil {
 		return nil, err
 	}
-	secretData := x.GetAccount().getData()
-	policyData := fmt.Sprintf(SecretPolicy, fullPath)
 
-	return &SecretRequest{
+	return &SecretMeta{
 		SecretName: secretName,
 		SecretPath: secretPath,
 		SecretType: REPO.String(),
 		FullPath:   fullPath,
 		PolicyName: policyName,
+	}, nil
+}
+
+func (x *RepoRequest) ConvertRequest() (*SecretRequest, error) {
+	secretMeta, err := x.Meta.GetNames()
+	if err != nil {
+		return nil, err
+	}
+
+	secretData := x.GetAccount().getData()
+	policyData := fmt.Sprintf(SecretPolicy, secretMeta.FullPath)
+
+	return &SecretRequest{
+		SecretMeta: *secretMeta,
 		SecretData: secretData,
 		PolicyData: policyData,
 	}, nil
 }
 
-func (x *ClusterRequest) ConvertRequest() (*SecretRequest, error) {
-	var err error
-
+func (x *ClusterMeta) GetNames() (*SecretMeta, error) {
 	secretName := ClusterSecretName
 	secretPath, err := GetPath(x, ClusterPathTemplate)
 	if err != nil {
@@ -245,23 +261,33 @@ func (x *ClusterRequest) ConvertRequest() (*SecretRequest, error) {
 	if err != nil {
 		return nil, err
 	}
-	secretData := x.GetAccount().getData()
-	policyData := fmt.Sprintf(ClusterPolicy, secretPath, x.GetClusterid())
 
-	return &SecretRequest{
+	return &SecretMeta{
 		SecretName: secretName,
 		SecretPath: secretPath,
 		SecretType: CLUSTER.String(),
 		FullPath:   fullPath,
 		PolicyName: policyName,
+	}, nil
+}
+
+func (x *ClusterRequest) ConvertRequest() (*SecretRequest, error) {
+	secretMeta, err := x.Meta.GetNames()
+	if err != nil {
+		return nil, err
+	}
+
+	secretData := x.GetAccount().getData()
+	policyData := fmt.Sprintf(ClusterPolicy, secretMeta.SecretPath, x.Meta.GetId())
+
+	return &SecretRequest{
+		SecretMeta: *secretMeta,
 		SecretData: secretData,
 		PolicyData: policyData,
 	}, nil
 }
 
-func (x *TenantGitRequest) ConvertRequest() (*SecretRequest, error) {
-	var err error
-
+func (x *TenantGitMeta) GetNames() (*SecretMeta, error) {
 	secretName := TenantSecretName
 	secretPath, err := GetPath(x, TenantGitPathTemplate)
 	if err != nil {
@@ -272,23 +298,36 @@ func (x *TenantGitRequest) ConvertRequest() (*SecretRequest, error) {
 	if err != nil {
 		return nil, err
 	}
-	secretData := x.GetAccount().getData()
-	policyData := fmt.Sprintf(SecretPolicy, fullPath)
 
-	return &SecretRequest{
+	return &SecretMeta{
 		SecretName: secretName,
 		SecretPath: secretPath,
 		SecretType: TENANTGIT.String(),
 		FullPath:   fullPath,
 		PolicyName: policyName,
+	}, nil
+}
+
+func (x *TenantGitRequest) ConvertRequest() (*SecretRequest, error) {
+	secretMeta, err := x.Meta.GetNames()
+	if err != nil {
+		return nil, err
+	}
+
+	secretData := make(map[string]interface{}, 0)
+	if x.Kvs != nil {
+		secretData = x.Kvs.getData()
+	}
+	policyData := fmt.Sprintf(SecretPolicy, secretMeta.FullPath)
+
+	return &SecretRequest{
+		SecretMeta: *secretMeta,
 		SecretData: secretData,
 		PolicyData: policyData,
 	}, nil
 }
 
-func (x *TenantRepoRequest) ConvertRequest() (*SecretRequest, error) {
-	var err error
-
+func (x *TenantRepoMeta) GetNames() (*SecretMeta, error) {
 	secretName := TenantSecretName
 	secretPath, err := GetPath(x, TenantRepoPathTemplate)
 	if err != nil {
@@ -299,15 +338,27 @@ func (x *TenantRepoRequest) ConvertRequest() (*SecretRequest, error) {
 	if err != nil {
 		return nil, err
 	}
-	secretData := x.GetAccount().getData()
-	policyData := fmt.Sprintf(SecretPolicy, fullPath)
 
-	return &SecretRequest{
+	return &SecretMeta{
 		SecretName: secretName,
 		SecretPath: secretPath,
 		SecretType: TENANTREPO.String(),
 		FullPath:   fullPath,
 		PolicyName: policyName,
+	}, nil
+}
+
+func (x *TenantRepoRequest) ConvertRequest() (*SecretRequest, error) {
+	secretMeta, err := x.Meta.GetNames()
+	if err != nil {
+		return nil, err
+	}
+
+	secretData := x.GetAccount().getData()
+	policyData := fmt.Sprintf(SecretPolicy, secretMeta.FullPath)
+
+	return &SecretRequest{
+		SecretMeta: *secretMeta,
 		SecretData: secretData,
 		PolicyData: policyData,
 	}, nil
@@ -318,11 +369,7 @@ func (x *AuthRequest) ConvertRequest() (*SecretRequest, error) {
 	fullPath := fmt.Sprintf("auth/%s", x.ClusterName)
 
 	return &SecretRequest{
-		SecretName: "",
-		SecretPath: "",
-		SecretType: "",
-		FullPath:   fullPath,
-		PolicyName: "",
+		SecretMeta: SecretMeta{FullPath: fullPath},
 		SecretData: nil,
 		PolicyData: "",
 	}, nil
@@ -333,11 +380,7 @@ func (x *AuthroleRequest) ConvertRequest() (*SecretRequest, error) {
 	fullPath := fmt.Sprintf("auth/%s/role/%s", x.ClusterName, x.DestUser)
 
 	return &SecretRequest{
-		SecretName: "",
-		SecretPath: "",
-		SecretType: "",
-		FullPath:   fullPath,
-		PolicyName: "",
+		SecretMeta: SecretMeta{FullPath: fullPath},
 		SecretData: nil,
 		PolicyData: "",
 	}, nil
@@ -352,39 +395,56 @@ type AuthGrantRequest interface {
 	ConvertToAuthPolicyReqeuest() (*GrantTarget, *SecretRequest, error)
 }
 
-func ConvertAuthGrantRequest(cluster, user string, sec SecRequest) (*GrantTarget, *SecretRequest, error) {
+func ConvertAuthGrantRequest(cluster, user string, sec *SecretMeta) (*GrantTarget, *SecretRequest, error) {
 	rolePath, err := GetPath(map[string]string{"ClusterName": cluster, "Projectid": user}, RolePathTemplate)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	secReq, err := sec.ConvertRequest()
-	if err != nil {
-		return nil, nil, err
-	}
-
 	return &GrantTarget{
-		RolePath: rolePath,
-		Name:     user,
-	}, secReq, nil
+			RolePath: rolePath,
+			Name:     user,
+		}, &SecretRequest{
+			SecretMeta: *sec,
+		}, nil
 }
 
 func (req *AuthroleGitPolicyRequest) ConvertToAuthPolicyReqeuest() (*GrantTarget, *SecretRequest, error) {
-	return ConvertAuthGrantRequest(req.ClusterName, req.DestUser, req.GetSecretOptions())
+	secretMeta, err := req.Secret.GetNames()
+	if err != nil {
+		return nil, nil, err
+	}
+	return ConvertAuthGrantRequest(req.ClusterName, req.DestUser, secretMeta)
 }
 
 func (req *AuthroleRepoPolicyRequest) ConvertToAuthPolicyReqeuest() (*GrantTarget, *SecretRequest, error) {
-	return ConvertAuthGrantRequest(req.ClusterName, req.DestUser, req.GetSecretOptions())
+	secretMeta, err := req.Secret.GetNames()
+	if err != nil {
+		return nil, nil, err
+	}
+	return ConvertAuthGrantRequest(req.ClusterName, req.DestUser, secretMeta)
 }
 
 func (req *AuthroleClusterPolicyRequest) ConvertToAuthPolicyReqeuest() (*GrantTarget, *SecretRequest, error) {
-	return ConvertAuthGrantRequest(req.ClusterName, req.DestUser, req.GetSecretOptions())
+	secretMeta, err := req.Secret.GetNames()
+	if err != nil {
+		return nil, nil, err
+	}
+	return ConvertAuthGrantRequest(req.ClusterName, req.DestUser, secretMeta)
 }
 
 func (req *AuthroleTenantGitPolicyRequest) ConvertToAuthPolicyReqeuest() (*GrantTarget, *SecretRequest, error) {
-	return ConvertAuthGrantRequest(req.ClusterName, req.DestUser, req.GetSecretOptions())
+	secretMeta, err := req.Secret.GetNames()
+	if err != nil {
+		return nil, nil, err
+	}
+	return ConvertAuthGrantRequest(req.ClusterName, req.DestUser, secretMeta)
 }
 
 func (req *AuthroleTenantRepoPolicyRequest) ConvertToAuthPolicyReqeuest() (*GrantTarget, *SecretRequest, error) {
-	return ConvertAuthGrantRequest(req.ClusterName, req.DestUser, req.GetSecretOptions())
+	secretMeta, err := req.Secret.GetNames()
+	if err != nil {
+		return nil, nil, err
+	}
+	return ConvertAuthGrantRequest(req.ClusterName, req.DestUser, secretMeta)
 }
