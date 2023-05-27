@@ -11,6 +11,9 @@ server:
       acl: ./configs/casbin/resource_acl.csv
     permission:
       acl: ./configs/casbin/permission_acl.csv
+  nautes:
+    tenant_name:
+    - nautes
 
 data:
   vault:

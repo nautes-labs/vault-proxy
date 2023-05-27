@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.6.1
 // - protoc             v3.21.5
-// source: vaultproxy/v1/health.proto
+// source: api/vaultproxy/v1/health.proto
 
 package v1
 

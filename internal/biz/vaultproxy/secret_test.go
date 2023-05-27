@@ -47,14 +47,21 @@ func (m *mockSecret) ConvertRequest() (*vpApi.SecretRequest, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
+	secretMeta, _ := m.GetNames()
 	return &vpApi.SecretRequest{
+		SecretMeta: *secretMeta,
+		SecretData: m.SecretData,
+		PolicyData: m.PolicyData,
+	}, nil
+}
+
+func (m *mockSecret) GetNames() (*vpApi.SecretMeta, error) {
+	return &vpApi.SecretMeta{
 		SecretName: m.SecretName,
 		SecretPath: m.SecretPath,
 		SecretType: m.SecretType,
 		FullPath:   m.FullPath,
 		PolicyName: m.PolicyName,
-		SecretData: m.SecretData,
-		PolicyData: m.PolicyData,
 	}, nil
 }
 
@@ -65,7 +72,8 @@ type mockPolicyRequest struct {
 }
 
 func (mpr *mockPolicyRequest) ConvertToAuthPolicyReqeuest() (*vpApi.GrantTarget, *vpApi.SecretRequest, error) {
-	return vpApi.ConvertAuthGrantRequest(mpr.ClusterName, mpr.DestUser, &mpr.Secret)
+	secretMeta, _ := mpr.Secret.GetNames()
+	return vpApi.ConvertAuthGrantRequest(mpr.ClusterName, mpr.DestUser, secretMeta)
 }
 
 var vpClient *vaultproxy.VaultUsercase
@@ -280,7 +288,7 @@ var _ = Describe("Auth", func() {
 					dmNeZZIwCgYIKoZIzj0EAwIDSQAwRgIhAKSXFcgPQTn4gQRQhBLxCJiPwJyC3Vc0
 					wpBiyGE7exo8AiEAq9SP2sMm64ZAiI7QNSGQURKNPmhVcS7OuVnEMta63dM=
 					-----END CERTIFICATE-----`,
-				Usertoken: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImlpSFBBMXZ6eHRUaFNFcy01alU3YkhSaFJYbzVsS0Z5RXpNR2V6ZnJlb0UifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJwcm9qZWN0LTI0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4tcWQ2bDUiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjIxMTNiY2VkLTVlYzItNDdhZS1iMWJhLTE5MmM5ZGJhMmJiOCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpwcm9qZWN0LTI0OmRlZmF1bHQifQ.iTeppMY9p-P9xT0OgCvShM0Ln38bohnGDnpE4lu6iFpNUUIHV-kdzozHWI_5DHlFo8v55MXXqVFqmjwjIzgtKqZYasyfE36XHL_DTzdsfWqtHbB33nwLLV3iGYnoEOxYsoal4JQV8LMpSnZocRdOjI2WM1Bm8_2H1dh3FZQ-4BstHha4Xx9zveNsviFvEprJ5j1z4nQwSiGJy6-aFx5EF3AKN0eokY8pZX5xIOBwULiE41Bjj1BpbyAM-b38fzVe_SSTeaU1ycaUXofd155lyxE7QLOE-6XLLP0F4wS9LPf7Z6ufcdxypxB3R3cvuvryBdCIiGa738g6KIjMKDDzIw",
+				Token: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImlpSFBBMXZ6eHRUaFNFcy01alU3YkhSaFJYbzVsS0Z5RXpNR2V6ZnJlb0UifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJwcm9qZWN0LTI0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4tcWQ2bDUiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjIxMTNiY2VkLTVlYzItNDdhZS1iMWJhLTE5MmM5ZGJhMmJiOCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpwcm9qZWN0LTI0OmRlZmF1bHQifQ.iTeppMY9p-P9xT0OgCvShM0Ln38bohnGDnpE4lu6iFpNUUIHV-kdzozHWI_5DHlFo8v55MXXqVFqmjwjIzgtKqZYasyfE36XHL_DTzdsfWqtHbB33nwLLV3iGYnoEOxYsoal4JQV8LMpSnZocRdOjI2WM1Bm8_2H1dh3FZQ-4BstHha4Xx9zveNsviFvEprJ5j1z4nQwSiGJy6-aFx5EF3AKN0eokY8pZX5xIOBwULiE41Bjj1BpbyAM-b38fzVe_SSTeaU1ycaUXofd155lyxE7QLOE-6XLLP0F4wS9LPf7Z6ufcdxypxB3R3cvuvryBdCIiGa738g6KIjMKDDzIw",
 			},
 		}
 
@@ -290,7 +298,7 @@ var _ = Describe("Auth", func() {
 			Role: &vpApi.AuthroleRequest_K8S{
 				K8S: &vpApi.KubernetesAuthRoleMeta{
 					Namespaces:      "default",
-					Serviceaccounts: "default",
+					ServiceAccounts: "default",
 				},
 			},
 		}
@@ -364,7 +372,7 @@ var _ = Describe("Auth", func() {
 
 			It("update auth token", func() {
 				newToken := "eyJhbGciOiJSUzI1NiIsImtpZCI6ImlpSFBBMXZ6eHRUaFNFcy01alU3YkhSaFJYbzVsS0Z5RXpNR2V6ZnJlb0UifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJwcm9qZWN0LTQwIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4tbHBtZmciLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImVhMzUwZThhLTljZTItNGYxZC05ODQwLTE5MmNmYWFhY2MwMCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpwcm9qZWN0LTQwOmRlZmF1bHQifQ.I_krS28u76wRzvxDSkJReeIekV8Ox9kLvyFu9h1sB_DmWlXWswE8tvOBB_KRtrOnHoQFPNOtlbp96yEHzQVgMLNnfd2pcg6OATZCx2v02A7Qe7T3noQVbR3w926vibouXBvO_IvxHgJrRrEV4-J7ndb19JeBYj3j0_qSELgtla_-_ld-Zm8zQlHb-EvKC6GAu_O1AFVo74OBLiPJyMDfmsImAxvXa7Q43pg2rW5OEDDCs8VrKTAi6aqUkRG-tdWA1-It6lIjEsJ5w9iDlD_-rbi-72Qm-2o9rzQzWD3Y_eJTpDt35oXHHdTFp_XzoMdXVqSTfOHkPqGy2lM6knsoIA"
-				baseAuth.Kubernetes.Usertoken = newToken
+				baseAuth.Kubernetes.Token = newToken
 				rolePath := fmt.Sprintf("auth/%s/config", baseAuth.ClusterName)
 
 				err := vpClient.EnableAuth(context.Background(), baseAuth)
@@ -416,7 +424,7 @@ var _ = Describe("Auth", func() {
 			baseRole.Role = &vpApi.AuthroleRequest_K8S{
 				K8S: &vpApi.KubernetesAuthRoleMeta{
 					Namespaces:      newNs,
-					Serviceaccounts: "default",
+					ServiceAccounts: "default",
 				},
 			}
 			rolePath := fmt.Sprintf("auth/%s/role/%s", baseRole.ClusterName, baseRole.DestUser)
