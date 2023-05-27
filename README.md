@@ -1,7 +1,7 @@
 # Vault Proxy
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![golang](https://img.shields.io/badge/golang-v1.17.13-brightgreen)](https://go.dev/doc/install)
-[![version](https://img.shields.io/badge/version-v0.2.0-green)]()
+[![version](https://img.shields.io/badge/version-v0.3.0-green)]()
 
 Vault Proxy 项目是对开源版 [Vault](https://github.com/hashicorp/vault) 的增删改接口的封装，提供了更细粒度的权限控制。本项目的所有接口均是应用于 Nautes 的其他管理组件，暂不支持通用的增强 Vault 权限控制的需求。
 
@@ -236,4 +236,3 @@ kratos run
 ```shell
 go test -v ./...
 ```
-
