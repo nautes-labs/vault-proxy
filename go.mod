@@ -10,7 +10,7 @@ require (
 	github.com/google/wire v0.5.0
 	github.com/hashicorp/vault/api v1.9.0
 	github.com/hashicorp/vault/api/auth/approle v0.4.0
-	github.com/nautes-labs/pkg v0.2.1
+	github.com/nautes-labs/pkg v0.3.1
 	github.com/onsi/ginkgo/v2 v2.3.1
 	github.com/onsi/gomega v1.22.0
 	github.com/qiangmzsx/string-adapter/v2 v2.1.0
@@ -31,6 +31,7 @@ require (
 	github.com/go-logr/zapr v1.2.3 // indirect
 	github.com/go-playground/form/v4 v4.2.0 // indirect
 	github.com/golang/glog v1.0.0 // indirect
+	github.com/golang/mock v1.5.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.3.0 // indirect
