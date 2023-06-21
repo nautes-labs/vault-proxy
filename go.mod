@@ -10,7 +10,7 @@ require (
 	github.com/google/wire v0.5.0
 	github.com/hashicorp/vault/api v1.9.0
 	github.com/hashicorp/vault/api/auth/approle v0.4.0
-	github.com/nautes-labs/pkg v0.3.2
+	github.com/nautes-labs/pkg v0.3.3
 	github.com/onsi/ginkgo/v2 v2.10.0
 	github.com/onsi/gomega v1.27.7
 	github.com/qiangmzsx/string-adapter/v2 v2.1.0
@@ -77,5 +77,5 @@ require (
 require (
 	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	golang.org/x/time v0.3.0 // indirect
-	google.golang.org/grpc v1.51.0
+	google.golang.org/grpc v1.51.0 // indirect
 )
