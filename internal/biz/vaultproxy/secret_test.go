@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	. "github.com/onsi/ginkgo/v2"
@@ -295,10 +296,10 @@ var _ = Describe("Auth", func() {
 		baseRole = &vpApi.AuthroleRequest{
 			ClusterName: baseAuth.ClusterName,
 			DestUser:    "RUNTIME",
-			Role: &vpApi.AuthroleRequest_K8S{
-				K8S: &vpApi.KubernetesAuthRoleMeta{
-					Namespaces:      "default",
-					ServiceAccounts: "default",
+			Role: &vpApi.AuthroleRequest_Kubernetes{
+				Kubernetes: &vpApi.KubernetesAuthRoleMeta{
+					Namespaces:      []string{"default"},
+					ServiceAccounts: []string{"default"},
 				},
 			},
 		}
@@ -421,10 +422,10 @@ var _ = Describe("Auth", func() {
 		})
 		It("update a an existed role", func() {
 			newNs := "kube-system"
-			baseRole.Role = &vpApi.AuthroleRequest_K8S{
-				K8S: &vpApi.KubernetesAuthRoleMeta{
-					Namespaces:      newNs,
-					ServiceAccounts: "default",
+			baseRole.Role = &vpApi.AuthroleRequest_Kubernetes{
+				Kubernetes: &vpApi.KubernetesAuthRoleMeta{
+					Namespaces:      []string{newNs},
+					ServiceAccounts: []string{"default"},
 				},
 			}
 			rolePath := fmt.Sprintf("auth/%s/role/%s", baseRole.ClusterName, baseRole.DestUser)
@@ -553,6 +554,7 @@ var _ = Describe("Auth", func() {
 
 			err = vaultRawClient.Sys().Mount("git", mountInput)
 			Expect(err).Should(BeNil())
+			time.Sleep(time.Second)
 
 			_, err = vpClient.CreateSecret(context.Background(), &baseGrant.Secret)
 			Expect(err).Should(BeNil())
