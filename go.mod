@@ -75,6 +75,7 @@ require (
 )
 
 require (
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/envoyproxy/protoc-gen-validate v0.1.0
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/grpc v1.51.0 // indirect

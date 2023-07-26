@@ -308,8 +308,8 @@ message DeleteAuthReply {
 }
 
 message KubernetesAuthRoleMeta{
-    string namespaces = 1           [(validate.rules).string.min_len = 1];
-    string service_accounts = 2     [json_name = "service_accounts", (validate.rules).string.min_len = 1];
+    repeated string namespaces = 1           [(validate.rules).repeated.items.string.min_len = 1];
+    repeated string service_accounts = 2     [json_name = "service_accounts", (validate.rules).repeated.items.string.min_len = 1];
 }
 
 message AuthroleRequest {
@@ -318,7 +318,7 @@ message AuthroleRequest {
     // Vault role name in kubernetes auth
     string dest_user = 2            [json_name = "dest_user", (validate.rules).string.min_len = 1];
     oneof role {
-        KubernetesAuthRoleMeta k8s = 3;
+        KubernetesAuthRoleMeta kubernetes = 3;
     }
 }
 message CreateAuthroleReply {

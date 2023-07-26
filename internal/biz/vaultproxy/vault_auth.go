@@ -100,8 +100,8 @@ func (uc *VaultUsercase) CreateRole(ctx context.Context, req *pb.AuthroleRequest
 
 	path := fmt.Sprintf("auth/%s/role/%s", req.ClusterName, req.DestUser)
 	opts := map[string]interface{}{
-		"bound_service_account_namespaces": req.GetK8S().Namespaces,
-		"bound_service_account_names":      req.GetK8S().ServiceAccounts,
+		"bound_service_account_namespaces": req.GetKubernetes().Namespaces,
+		"bound_service_account_names":      req.GetKubernetes().ServiceAccounts,
 	}
 
 	uc.log.WithContext(ctx).Infof("create or update role %s", path)
