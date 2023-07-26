@@ -47,6 +47,11 @@ api:
 build:
 	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
 
+.PHONY: test
+# test
+test:
+	ginkgo -r
+
 .PHONY: generate
 # generate
 generate:

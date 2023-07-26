@@ -4036,26 +4036,36 @@ func (m *KubernetesAuthRoleMeta) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetNamespaces()) < 1 {
-		err := KubernetesAuthRoleMetaValidationError{
-			field:  "Namespaces",
-			reason: "value length must be at least 1 runes",
+	for idx, item := range m.GetNamespaces() {
+		_, _ = idx, item
+
+		if utf8.RuneCountInString(item) < 1 {
+			err := KubernetesAuthRoleMetaValidationError{
+				field:  fmt.Sprintf("Namespaces[%v]", idx),
+				reason: "value length must be at least 1 runes",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
 		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
+
 	}
 
-	if utf8.RuneCountInString(m.GetServiceAccounts()) < 1 {
-		err := KubernetesAuthRoleMetaValidationError{
-			field:  "ServiceAccounts",
-			reason: "value length must be at least 1 runes",
+	for idx, item := range m.GetServiceAccounts() {
+		_, _ = idx, item
+
+		if utf8.RuneCountInString(item) < 1 {
+			err := KubernetesAuthRoleMetaValidationError{
+				field:  fmt.Sprintf("ServiceAccounts[%v]", idx),
+				reason: "value length must be at least 1 runes",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
 		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
+
 	}
 
 	if len(errors) > 0 {
@@ -4183,7 +4193,7 @@ func (m *AuthroleRequest) validate(all bool) error {
 	}
 
 	switch v := m.Role.(type) {
-	case *AuthroleRequest_K8S:
+	case *AuthroleRequest_Kubernetes:
 		if v == nil {
 			err := AuthroleRequestValidationError{
 				field:  "Role",
@@ -4196,11 +4206,11 @@ func (m *AuthroleRequest) validate(all bool) error {
 		}
 
 		if all {
-			switch v := interface{}(m.GetK8S()).(type) {
+			switch v := interface{}(m.GetKubernetes()).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
 					errors = append(errors, AuthroleRequestValidationError{
-						field:  "K8S",
+						field:  "Kubernetes",
 						reason: "embedded message failed validation",
 						cause:  err,
 					})
@@ -4208,16 +4218,16 @@ func (m *AuthroleRequest) validate(all bool) error {
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
 					errors = append(errors, AuthroleRequestValidationError{
-						field:  "K8S",
+						field:  "Kubernetes",
 						reason: "embedded message failed validation",
 						cause:  err,
 					})
 				}
 			}
-		} else if v, ok := interface{}(m.GetK8S()).(interface{ Validate() error }); ok {
+		} else if v, ok := interface{}(m.GetKubernetes()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return AuthroleRequestValidationError{
-					field:  "K8S",
+					field:  "Kubernetes",
 					reason: "embedded message failed validation",
 					cause:  err,
 				}

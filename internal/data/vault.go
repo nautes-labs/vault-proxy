@@ -18,11 +18,14 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/nautes-labs/vault-proxy/internal/conf"
 
+	"github.com/avast/retry-go"
 	"github.com/go-kratos/kratos/v2/log"
 	vault "github.com/hashicorp/vault/api"
 	approleauth "github.com/hashicorp/vault/api/auth/approle"
@@ -102,12 +105,30 @@ func (vc *VaultClient) GetSecret(ctx context.Context, secretname, path string) (
 }
 
 func (vc *VaultClient) CreateSecret(ctx context.Context, secretName string, path string, data map[string]interface{}) (*vault.KVSecret, error) {
-	kv, err := vc.Client.KVv2(secretName).Put(ctx, path, data)
+	var kv *vault.KVSecret
+	err := retry.Do(
+		func() error {
+			var err error
+			kv, err = vc.Client.KVv2(secretName).Put(ctx, path, data)
+			if err != nil {
+				vc.log.WithContext(ctx).Error(err)
+				return err
+			}
+			vc.log.WithContext(ctx).Infof("create secret %s successed", path)
+			return nil
+		},
+		retry.RetryIf(func(err error) bool {
+			vaultErrPtr := errors.Unwrap(err)
+			vaultErr, ok := vaultErrPtr.(*vault.ResponseError)
+			if ok && vaultErr.StatusCode == 400 {
+				time.Sleep(time.Second)
+				return true
+			}
+			return false
+		}))
 	if err != nil {
-		vc.log.WithContext(ctx).Error(err)
 		return nil, err
 	}
-	vc.log.WithContext(ctx).Infof("create secret %s successed", path)
 	return kv, nil
 }
 
