@@ -28,7 +28,6 @@ Thumbs.db
 *.cert
 *.key
 *.log
-log/
 bin/
 ca/
 
@@ -49,6 +48,6 @@ configs/config.yaml
 **/coverage
 
 # log folder
-*/log
+./log/**
 
 pipelines

@@ -26,7 +26,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/http"
-	"github.com/nautes-labs/pkg/pkg/log/zap"
+	"github.com/nautes-labs/vault-proxy/internal/pkg/log/zap"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
