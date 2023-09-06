@@ -18,7 +18,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"io/ioutil"
+	"os"
 	"regexp"
 
 	v1 "github.com/nautes-labs/vault-proxy/api/vaultproxy/v1"
@@ -108,7 +108,7 @@ func NewHTTPServer(c *conf.Server,
 		if err != nil {
 			log.Fatal(err)
 		}
-		caCert, err := ioutil.ReadFile(c.Http.Cert.CaCert)
+		caCert, err := os.ReadFile(c.Http.Cert.CaCert)
 		if err != nil {
 			log.Fatal(err)
 		}
