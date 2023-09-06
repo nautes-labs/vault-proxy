@@ -167,6 +167,9 @@ message DeletePkiReply {
 
 // REPO DEFINE
 message RepoAccount {
+    // auth method of this repo account, it must in [ token, password ].
+    // if token, it will load data will from token.
+    // if password, it will load data from account.
     string auth_type = 1 [json_name = "auth_type"];
     Token token = 2;
     Account account = 3;
