@@ -26,11 +26,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	authService := service.NewAuthService(vaultUsercase)
 	authGrantService := service.NewAuthGrantService(vaultUsercase)
 	healthService := service.NewHealthService(vaultUsercase)
-	tracerProvider, err := data.NewZipkinTracer(confData)
-	if err != nil {
-		return nil, nil, err
-	}
-	httpServer := server.NewHTTPServer(confServer, secretService, authService, authGrantService, healthService, logger, tracerProvider)
+	httpServer := server.NewHTTPServer(confServer, secretService, authService, authGrantService, healthService, logger)
 	app := newApp(logger, httpServer)
 	return app, func() {
 	}, nil

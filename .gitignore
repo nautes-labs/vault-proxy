@@ -47,8 +47,3 @@ configs/config.yaml
 
 # coverage
 **/coverage
-
-# log folder
-*/log
-
-pipelines
