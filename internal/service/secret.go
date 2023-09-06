@@ -16,6 +16,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	pb "github.com/nautes-labs/vault-proxy/api/vaultproxy/v1"
 	vproxy "github.com/nautes-labs/vault-proxy/internal/biz/vaultproxy"
@@ -55,8 +56,27 @@ func (s *SecretService) CreatePki(ctx context.Context, req *pb.PkiRequest) (*pb.
 func (s *SecretService) DeletePki(ctx context.Context, req *pb.PkiRequest) (*pb.DeletePkiReply, error) {
 	return &pb.DeletePkiReply{}, nil
 }
-func (s *SecretService) CreateRepo(ctx context.Context, req *pb.RepoRequest) (*pb.CreateRepoReply, error) {
-	sec, err := s.uc.CreateSecret(ctx, req)
+
+const (
+	repoAuthTypeKey = "auth"
+)
+
+func (s *SecretService) CreateRepoAccount(ctx context.Context, req *pb.RepoRequest) (*pb.CreateRepoReply, error) {
+	sec, err := req.ConvertRequest()
+	switch sec.SecretData[pb.AuthTypeKey] {
+	case pb.AuthTypeToken:
+		if sec.SecretData["token"] == "" {
+			return nil, fmt.Errorf("token is empty")
+		}
+	case pb.AuthTypePassword:
+		if sec.SecretData["username"] == "" {
+			return nil, fmt.Errorf("account is empty")
+		}
+	default:
+		return nil, fmt.Errorf("auth type must in [ token, password ]")
+	}
+
+	secData, err := s.uc.CreateSecret(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -64,11 +84,18 @@ func (s *SecretService) CreateRepo(ctx context.Context, req *pb.RepoRequest) (*p
 		Secret: &pb.SecretInfo{
 			Name:    sec.SecretName,
 			Path:    sec.SecretPath,
-			Version: int32(sec.SecretVersion),
+			Version: int32(secData.SecretVersion),
 		},
 	}, nil
 }
-func (s *SecretService) DeleteRepo(ctx context.Context, req *pb.RepoRequest) (*pb.DeleteRepoReply, error) {
+func (s *SecretService) DeleteRepoAccountProduct(ctx context.Context, req *pb.RepoRequest) (*pb.DeleteRepoReply, error) {
+	err := s.uc.DeleteSecret(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DeleteRepoReply{}, nil
+}
+func (s *SecretService) DeleteRepoAccountProject(ctx context.Context, req *pb.RepoRequest) (*pb.DeleteRepoReply, error) {
 	err := s.uc.DeleteSecret(ctx, req)
 	if err != nil {
 		return nil, err
