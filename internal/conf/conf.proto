@@ -65,10 +65,6 @@ message Data {
     string roleID = 5;
     string secretID = 6;
   }
-  message Zipkin {
-    string url = 1;
-  }
   // Use to connect vault backend
   Vault vault = 1;
-  Zipkin zipkin = 2;
 }

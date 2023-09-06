@@ -2,10 +2,10 @@ server:
   http:
     addr: 0.0.0.0:8000
     timeout: 1s
-    cert : 
-      ca_cert: 
-      cert_file: 
-      key_file: 
+    cert :
+      ca_cert:
+      cert_file:
+      key_file:
   authorization:
     resource:
       acl: ./configs/casbin/resource_acl.csv
@@ -17,11 +17,11 @@ server:
 
 data:
   vault:
-    addr: 
+    addr:
     cert:
-      ca_cert: 
-    authPath: 
-    roleID: 
+      ca_cert:
+    authPath:
+    roleID:
     secretID:
-  zipkin:
-    url: 
+    # Connect vault by token. For debugging purposes only, not for production environments
+    token:
