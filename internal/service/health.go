@@ -29,7 +29,7 @@ func NewHealthService(uc *vproxy.VaultUsercase) *HealthService {
 	return &HealthService{uc: uc}
 }
 
-func (s *HealthService) Health(ctx context.Context, req *pb.HealthRequest) (*pb.HealthReply, error) {
+func (s *HealthService) Health(_ context.Context, _ *pb.HealthRequest) (*pb.HealthReply, error) {
 	standBy := false
 	vaultStatus := s.uc.Health()
 

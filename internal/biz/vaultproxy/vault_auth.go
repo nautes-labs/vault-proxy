@@ -23,10 +23,6 @@ import (
 	vault "github.com/hashicorp/vault/api"
 )
 
-var (
-	innerUser []string = []string{"ARGO", "BASE", "CLUSTER", "REPO", "RUNTIME"}
-)
-
 func (uc *VaultUsercase) EnableAuth(ctx context.Context, req *pb.AuthRequest) error {
 	if !verifyName(req.ClusterName) {
 		return errorNameVerifyFailed
@@ -212,8 +208,7 @@ func (uc *VaultUsercase) secretIsExist(ctx context.Context, secReq pb.SecretRequ
 		return fmt.Errorf("get policy for secret %s failed. %s", secReq.FullPath, err)
 	}
 	if policyData == "" {
-		return fmt.Errorf("policy for secret %s is empty.", secReq.FullPath)
-
+		return fmt.Errorf("policy for secret %s is empty", secReq.FullPath)
 	}
 
 	_, err = uc.client.GetSecret(ctx, secReq.SecretType, secReq.SecretPath)

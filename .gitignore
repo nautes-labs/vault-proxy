@@ -47,3 +47,5 @@ configs/config.yaml
 
 # coverage
 **/coverage
+
+*.DS_Store

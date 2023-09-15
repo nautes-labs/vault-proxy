@@ -29,7 +29,6 @@ func NewAuthGrantService(uc *vproxy.VaultUsercase) *AuthGrantService {
 	return &AuthGrantService{uc: uc}
 }
 func (s *AuthGrantService) GrantAuthroleGitPolicy(ctx context.Context, req *pb.AuthroleGitPolicyRequest) (*pb.GrantAuthrolePolicyReply, error) {
-
 	err := s.uc.GrantPermision(ctx, req)
 	if err != nil {
 		return nil, err
