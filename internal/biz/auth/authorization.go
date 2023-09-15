@@ -20,8 +20,6 @@ import (
 	"fmt"
 	"net/http"
 
-	api "github.com/nautes-labs/vault-proxy/api/vaultproxy/v1"
-
 	v1 "github.com/nautes-labs/vault-proxy/api/vaultproxy/v1"
 	"github.com/nautes-labs/vault-proxy/internal/conf"
 
@@ -127,8 +125,8 @@ type Transport interface {
 	Request() *http.Request
 }
 
-func GetSecretData(ctx context.Context, req interface{}) (string, string, string, error) {
-	user := FromAuthContext(ctx)
+func GetSecretData(ctx context.Context, req interface{}) (user, resource, action string, err error) {
+	user = FromAuthContext(ctx)
 
 	tr, ok := transport.FromServerContext(ctx)
 	if !ok {
@@ -142,36 +140,35 @@ func GetSecretData(ctx context.Context, req interface{}) (string, string, string
 	if err != nil {
 		return "", "", "", err
 	}
-	resource := metadata.FullPath
-	action := httpTransport.Request().Method
+	resource = metadata.FullPath
+	action = httpTransport.Request().Method
 	return user, resource, action, nil
 }
 
-func getGrantData(ctx context.Context, req interface{}) (string, string, *v1.GrantTarget, error) {
-	user := FromAuthContext(ctx)
+func getGrantData(ctx context.Context, req interface{}) (user, resource string, destUser *v1.GrantTarget, err error) {
+	user = FromAuthContext(ctx)
 	destUser, secret, err := req.(v1.AuthGrantRequest).ConvertToAuthPolicyReqeuest()
 	if err != nil {
 		return "", "", nil, err
 	}
-	resource := secret.FullPath
+	resource = secret.FullPath
 	return user, resource, destUser, nil
 }
 
-func (a *Authorizer) CheckSecretPermission(ctx context.Context, user, resource, action string) error {
+func (a *Authorizer) CheckSecretPermission(_ context.Context, user, resource, action string) error {
 	ok, err := a.blackListInspector.Enforce(user, resource)
 	if err != nil {
 		return err
 	}
 	if ok {
-		return fmt.Errorf("authorize failed, %s %s is in blacklick.", user, resource)
+		return fmt.Errorf("authorize failed, %s %s is in blacklick", user, resource)
 	}
-
 	ok, err = a.resourceInspector.Enforce(user, resource, action)
 	if err != nil {
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("authorize failed, %s %s %s not allowed.", user, action, resource)
+		return fmt.Errorf("authorize failed, %s %s %s not allowed", user, action, resource)
 	}
 	return nil
 }
@@ -180,7 +177,7 @@ func (a *Authorizer) CheckSecretPermission(ctx context.Context, user, resource, 
 // 1. Request are not in black list (blacklist is a regex list, current use to block runtime grant the role in tenant cluster)
 // 2. User has grant permission in resource acl
 // 3. User can grant resource to user
-func (a *Authorizer) CheckGrantPermission(ctx context.Context, user, resource string, dstUser *v1.GrantTarget) error {
+func (a *Authorizer) CheckGrantPermission(_ context.Context, user, resource string, dstUser *v1.GrantTarget) error {
 	ok, err := a.blackListInspector.Enforce(user, dstUser.RolePath)
 	if err != nil {
 		return err
@@ -207,22 +204,21 @@ func AuthProcess(ctx context.Context, auth *Authorizer, checkType int, req inter
 	case BASIC:
 		user, resource, action, err := GetSecretData(ctx, req)
 		if err != nil {
-			return api.ErrorInputArgError("Can not conver request type: %s", err)
+			return v1.ErrorInputArgError("Can not conver request type: %s", err)
 		}
 
 		err = auth.CheckSecretPermission(ctx, user, resource, action)
 		if err != nil {
-			return api.ErrorActionNotAllow("This action is now allowed by current user: %s", err)
+			return v1.ErrorActionNotAllow("This action is now allowed by current user: %s", err)
 		}
 	case GRANT:
 		user, resource, destUser, err := getGrantData(ctx, req)
 		if err != nil {
-			return api.ErrorInputArgError("Can not conver request type: %s", err)
+			return v1.ErrorInputArgError("Can not conver request type: %s", err)
 		}
 		err = auth.CheckGrantPermission(ctx, user, resource, destUser)
 		if err != nil {
-			return api.ErrorActionNotAllow("This action is now allowed by current user: %s", err)
-
+			return v1.ErrorActionNotAllow("This action is now allowed by current user: %s", err)
 		}
 	}
 	return nil

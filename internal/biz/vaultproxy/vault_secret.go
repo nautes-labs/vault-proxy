@@ -52,7 +52,8 @@ func (uc *VaultUsercase) CreateSecret(ctx context.Context, req pb.SecRequest) (*
 	// If rollback failed, the policy will be removed
 	if err != nil {
 		rollbackError := uc.revokeToPreVersion(ctx, secretName, secretPath)
-		return nil, pb.ErrorInputArgError("create policy %s failed, try to rollback secret %s at sub path %s: %s", policyPath, secretName, secretPath, fmt.Errorf("%v: %s", err, rollbackError))
+		return nil, pb.ErrorInputArgError("create policy %s failed, try to rollback secret %s at sub path %s: %s",
+			policyPath, secretName, secretPath, fmt.Errorf("%v: %s", err, rollbackError))
 	}
 
 	return &SecretData{

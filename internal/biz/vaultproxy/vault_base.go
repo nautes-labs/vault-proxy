@@ -24,13 +24,6 @@ import (
 	vpData "github.com/nautes-labs/vault-proxy/internal/data"
 )
 
-const (
-	GIT_SECRET_NAME     = "git"
-	REPO_SECRET_NAME    = "repo"
-	CLUSTER_SECRET_NAME = "cluster"
-	TENANT_SECRET_NAME  = "tenant"
-)
-
 var (
 	templateList = map[string]string{
 		"GitPathTemplate":              "{{.Providertype}}/{{.Repoid}}/{{.Username}}/{{.Permission}}",

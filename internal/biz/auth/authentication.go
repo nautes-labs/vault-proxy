@@ -27,9 +27,8 @@ func GetUsername(req *http.Request) (string, error) {
 	if req.TLS != nil && len(req.TLS.VerifiedChains) > 0 && len(req.TLS.VerifiedChains[0]) > 0 {
 		var commonName = req.TLS.VerifiedChains[0][0].Subject.CommonName
 		return commonName, nil
-	} else {
-		return "", api.ErrorAuthFailed("can not find user info in client keypair")
 	}
+	return "", api.ErrorAuthFailed("can not find user info in client keypair")
 }
 
 func NewAuthContext(ctx context.Context, user string) context.Context {

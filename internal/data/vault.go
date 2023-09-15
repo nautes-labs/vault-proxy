@@ -19,8 +19,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/nautes-labs/vault-proxy/internal/conf"
@@ -47,7 +47,7 @@ func NewVaultClient(c *conf.Data, logger log.Logger) VaultClientInterface {
 
 	if c.Vault.Cert != nil && c.Vault.Cert.CaCert != "" {
 		ca := c.Vault.Cert.CaCert
-		caCert, err := ioutil.ReadFile(ca)
+		caCert, err := os.ReadFile(ca)
 		if err != nil {
 			helper.Fatal(err)
 			return nil
@@ -244,7 +244,7 @@ func (vc *VaultClient) Health() bool {
 		vc.log.Error(err)
 		return false
 	}
-	if health.Initialized != true && health.Sealed != false {
+	if !health.Initialized && health.Sealed {
 		vc.log.Error("vault is not initialized or unsealed")
 		return false
 	}

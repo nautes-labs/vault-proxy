@@ -35,11 +35,11 @@ import (
 )
 
 var (
-	BasicAPIList []string = []string{
+	BasicAPIList = []string{
 		`\/api\.vaultproxy\.v1\.Secret\/.*`,
 		`\/api\.vaultproxy\.v1\.Auth\/.*`,
 	}
-	GrantAPIList []string = []string{
+	GrantAPIList = []string{
 		`\/api\.vaultproxy\.v1\.AuthGrant\/.*`,
 	}
 )
@@ -77,8 +77,7 @@ func NewHTTPServer(c *conf.Server,
 	authService *service.AuthService,
 	authGrantService *service.AuthGrantService,
 	healthService *service.HealthService,
-	logger log.Logger) *http.Server {
-
+	_ log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			validate.Validator(),
@@ -106,11 +105,11 @@ func NewHTTPServer(c *conf.Server,
 	if c.Http.Cert != nil {
 		cert, err := tls.LoadX509KeyPair(c.Http.Cert.CertFile, c.Http.Cert.KeyFile)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(err) //nolint:revive
 		}
 		caCert, err := os.ReadFile(c.Http.Cert.CaCert)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(err) //nolint:revive
 		}
 		caCertPool := x509.NewCertPool()
 		caCertPool.AppendCertsFromPEM(caCert)

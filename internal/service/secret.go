@@ -50,19 +50,18 @@ func (s *SecretService) DeleteGit(ctx context.Context, req *pb.GitRequest) (*pb.
 	}
 	return &pb.DeleteGitReply{}, nil
 }
-func (s *SecretService) CreatePki(ctx context.Context, req *pb.PkiRequest) (*pb.CreatePkiReply, error) {
+func (s *SecretService) CreatePki(_ context.Context, _ *pb.PkiRequest) (*pb.CreatePkiReply, error) {
 	return &pb.CreatePkiReply{}, nil
 }
-func (s *SecretService) DeletePki(ctx context.Context, req *pb.PkiRequest) (*pb.DeletePkiReply, error) {
+func (s *SecretService) DeletePki(_ context.Context, _ *pb.PkiRequest) (*pb.DeletePkiReply, error) {
 	return &pb.DeletePkiReply{}, nil
 }
 
-const (
-	repoAuthTypeKey = "auth"
-)
-
 func (s *SecretService) CreateRepoAccount(ctx context.Context, req *pb.RepoRequest) (*pb.CreateRepoReply, error) {
 	sec, err := req.ConvertRequest()
+	if err != nil {
+		return nil, err
+	}
 	switch sec.SecretData[pb.AuthTypeKey] {
 	case pb.AuthTypeToken:
 		if sec.SecretData["token"] == "" {
