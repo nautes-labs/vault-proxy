@@ -1,0 +1,10 @@
+changelog:
+  categories:
+    - title: Feature changed
+      labels:
+        - new
+        - update
+        - remove
+    - title: Bug fix
+      labels:
+        - fix
