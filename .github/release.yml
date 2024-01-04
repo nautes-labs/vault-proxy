@@ -1,10 +1,14 @@
 changelog:
   categories:
-    - title: Feature changed
+    - title: Added
       labels:
         - new
-        - update
-        - remove
-    - title: Bug fix
+    - title: Fixed
       labels:
         - fix
+    - title: Changed
+      labels:
+        - update
+    - title: Removed
+      labels:
+        - remove
