@@ -1,7 +1,7 @@
 # Vault Proxy
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![golang](https://img.shields.io/badge/golang-v1.20.0-brightgreen)](https://go.dev/doc/install)
-[![version](https://img.shields.io/badge/version-v0.4.0-green)]()
+[![version](https://img.shields.io/github/v/release/nautes-labs/vault-proxy)](https://github.com/nautes-labs/vault-proxy/releases/latest)
 
 Vault Proxy 项目是对开源版 [Vault](https://github.com/hashicorp/vault) 的增删改接口的封装，提供了更细粒度的权限控制。本项目所有接口均为 Nautes 的资源定制，不支持通用的 Vault 权限控制的需求。
 
